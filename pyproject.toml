@@ -1,5 +1,5 @@
 [tool.cibuildwheel]
-skip = "musllinux*"
+build = "manylinux*"
 manylinux-x86_64-image = "manylinux_2_24"
 manylinux-i686-image = "manylinux_2_24"
 #musllinux-x86_64-image = "musllinux_1_1"
