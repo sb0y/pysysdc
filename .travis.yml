@@ -1,5 +1,5 @@
 dist: xenial
-#language: cpp
+language: python
   
 #addons:
 #  apt:
