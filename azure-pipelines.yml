@@ -1,0 +1,160 @@
+pool:
+  name: DC Box Build Fabric
+
+variables:
+  # system.debug: True
+  semver: 1.1
+  AUTHOR: "Andrey Bagrintsev"
+  EMAIL: "a.bagrintsev@petrosoftinc.com"
+  PACKAGE_NAME: "pysysdc"
+
+stages:
+# Versioning branch builds
+  - stage:
+    displayName: 'Build Version Number'
+    # condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    jobs:
+    - job: Build_Version_Number
+      variables:
+        stageName: other
+        patch_dev: $[counter(format('{0}_{1}', variables['semver'], variables['stageName']), 0)]
+        version: $(semver).$(patch_dev)-$(Build.BuildID)
+      steps:
+      - bash: |
+           echo "##vso[build.updatebuildnumber]$(version)"
+        name: SetDevBuildName
+
+
+# Stage for building your application
+#Build for Ubuntu 16.04
+  - stage:
+    displayName: 'Build for Ubuntu 16'
+    condition: always()
+
+    jobs:
+    - job: Build_Steps_16
+      displayName: 'Build for 16.04'
+      pool:
+        name: DC Box Build Fabric
+        demands: Agent.Name -equals 16
+
+      steps:
+      - checkout: self
+        clean: true
+        persistCredentials: true
+
+      - task: Bash@3
+        inputs:
+          displayName: 'Build package'
+          targetType: 'inline'
+          script: |
+            pwd
+            ./build.sh
+            cp -f deb_dist/*_amd64.deb $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+
+      - script: 'rm -rf ..?* .[!.]* *'
+        displayName: Clean
+
+#Build for Ubuntu 20.04
+  - stage:
+    displayName: 'Build for Ubuntu 20'
+    condition: always()
+
+    jobs:
+    - job: Build_Steps_20
+      displayName: 'Build for 20.04'
+      pool:
+        name: DC Box Build Fabric
+        demands: Agent.Name -equals 20
+
+      steps:
+      - checkout: self
+        clean: true
+        persistCredentials: true
+
+      - task: Bash@3
+        inputs:
+          displayName: 'Build package'
+          targetType: 'inline'
+          script: |
+            pwd
+            ./build.sh
+            cp -f deb_dist/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_amd64.deb $(Build.ArtifactStagingDirectory)/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_20-04_amd64.deb
+
+      - task: CopyFilesOverSSH@0
+        displayName: 'Securely copy files to the remote machine'
+        inputs:
+          sshEndpoint: 'rk repo'
+          sourceFolder: '$(Build.ArtifactStagingDirectory)'
+          contents: "python3-$(PACKAGE_NAME)_$(Build.BuildNumber)_20-04_amd64.deb"
+          targetFolder: /home/user/repos/20.04
+
+      - task: SSH@0
+        displayName: 'Run package list update at RK repo server'
+        inputs:
+          sshEndpoint: 'rk repo'
+          commands: '/home/user/repos/scripts/publish.sh --repo=''20.04'' --commit=''$(Build.SourceVersion)'''
+
+      # - task: PublishBuildArtifacts@1
+      #   displayName: 'Publish Artifact: drop'
+
+      # - script: "rm -rf ..?* .[!.]* * ../'$(PACKAGE_NAME)'*"
+      #   displayName: Clean
+
+#Build for Ubuntu 20 ARM
+  - stage:
+    displayName: 'Build for Ubuntu ARM'
+    condition: always()
+
+    jobs:
+    - job: Build_Steps_ARM
+      displayName: 'Build for ARM64'
+      pool:
+        name: DC Box Build Fabric
+        demands: Agent.Name -equals arm64
+
+      steps:
+      - checkout: self
+        clean: true
+        persistCredentials: true
+
+      - task: Bash@3
+        inputs:
+          displayName: 'Build package'
+          targetType: 'inline'
+          script: |
+            pwd
+            ./build.sh
+            cp -f deb_dist/*_arm64.deb $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+
+      - script: 'rm -rf ..?* .[!.]* *'
+        displayName: Clean
+
+#Build and push tag
+  - stage:
+    displayName: 'Create build tag'
+    condition: always()
+
+    jobs:
+    - job: Create_Build_Tag
+      displayName: 'Create build tag'
+
+      steps:
+      - checkout: self
+        clean: true
+        persistCredentials: true
+
+      - script: |
+          #!/bin/bash
+          git tag $BuildTag
+          git push origin $BuildTag
+        env:
+          BuildTag: $(PACKAGE_NAME)_$(Build.BuildNumber)
+        displayName: 'Tag build'
+        condition: succeeded()
