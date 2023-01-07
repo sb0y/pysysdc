@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup, Extension
+from pathlib import Path
 import re
 
 VERSION = '1.0.0'
@@ -9,17 +10,21 @@ with open('pysysdc/__version__.py', 'r') as f:
 
 VERSION = re.sub(r'[^0-9.]+', '', VERSION)
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
 	name="pysysdc",
 	version=VERSION,
 	description="Python bindings for sd-bus",
-	long_description='',
+	long_description=long_description,
 	include_package_data=True,
 	author_email="andrey@bagrintsev.me",
-    author=[
+	long_description_content_type='text/markdown',
+	author=[
 		"Andrey Bagrintsev <andrey@bagrintsev.me>"
 	],
-	url="https://github.com/sb0y/",
+	url="https://github.com/sb0y/pysysdc",
 	license="BSD",
 	packages=["pysysdc"],
 	classifiers=[
