@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from setuptools import setup, Extension
 from pathlib import Path
 import re
@@ -10,7 +11,7 @@ with open('pysysdc/__version__.py', 'r') as f:
 
 VERSION = re.sub(r'[^0-9.]+', '', VERSION)
 
-long_description = Path("../../", "README.md").read_text()
+long_description = (Path(os.getcwd()) / "README.md").read_text()
 
 setup(
 	name="pysysdc",

@@ -6,3 +6,4 @@ include pysysdc/helpers.h
 include pysysdc/connect.h
 include scripts/dcbus
 include etc/dbus-1/system-local.conf
+include README.md
