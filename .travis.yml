@@ -5,6 +5,8 @@ addons:
   apt:
     packages:
      - python3-stdeb
+     - fakeroot 
+     - python-all
   
 #before_install:
 #  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
