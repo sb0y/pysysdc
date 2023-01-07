@@ -5,8 +5,8 @@ addons:
   apt:
     packages:
      - python3-stdeb
-     - fakeroot 
-     - python-all
+#     - fakeroot 
+#     - python-all
      - python3-all-dev
      - libsystemd-dev
   
