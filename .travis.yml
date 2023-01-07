@@ -15,4 +15,4 @@ language: python
 
 
 script:
-    - build.sh 
+    - ./build.sh 
