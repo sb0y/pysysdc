@@ -1,4 +1,6 @@
-dist: xenial
+dist: 
+    - xenial
+    - focal
 language: c
   
 addons:
@@ -6,14 +8,8 @@ addons:
     packages:
      - python3-stdeb
      - fakeroot 
-#     - python-all
      - python3-all-dev
      - libsystemd-dev
   
-#before_install:
-#  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
-#  - sudo apt-get update -qq
-
-
 script:
     - ./build.sh 
