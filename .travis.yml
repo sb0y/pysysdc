@@ -11,19 +11,10 @@ addons:
   apt:
     packages:
      - python3-stdeb
-     - python3-setuptools
      - fakeroot 
      - python3-all
-     - python-all
      - python3-all-dev
      - libsystemd-dev
-     - python3
-     - python3-dev 
-     - dh-python 
-     - fdupes 
-     - build-essential 
-     - devscripts 
-     - debhelper
 
 script:
     - ./build.sh 
