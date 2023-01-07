@@ -1,8 +1,12 @@
-dist: 
-    - xenial
-    - focal
 language: c
-  
+os:
+    - linux
+
+matrix:
+    include:
+        - dist: xenial
+        - dist: focal
+
 addons:
   apt:
     packages:
