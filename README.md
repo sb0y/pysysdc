@@ -8,7 +8,7 @@ Tested on Ubuntu 16.04 and Ubuntu 20.04.
 If you are orchestrating a large number of services on a Linux system, you have to run the command `service` or `systemctl` quite frequently.
 If you want to do this programmatically, you have to start the process in most cases with a shell (to parse `systemctl` command's arguments) which sometimes may lead you to arguments symbols escaping.
 
-What will do the `systemctl restart nginx.service` command in the end? This command will send a message over SD-Bus to the systemd daemon (PID 1) which will restart the service.
+What will do the `systemctl restart nginx.service` command in the end? This command will send a message over SD-Bus to the systemd daemon (PID 1) which will restart `nginx` service.
 What if it is possible to send the message to systemd through the SD-Bus directly from Python? What if the same mechanism can be used for IPC?
 
 ## How to compile
