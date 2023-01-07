@@ -11,6 +11,7 @@ DEB_VERSION=$(echo $BUILD_BUILDNUMBER | sed 's/^.*\-//')
 # Set  version in files
 sed -i "s/%VERSION%/${PYT_VERSION}/" pysysdc/__version__.py stdeb.cfg
 
+# https://github.com/pypa/setuptools/issues/3278
 export SETUPTOOLS_USE_DISTUTILS=stdlib
 ./clean.sh
 python3 ./setup.py --command-packages=stdeb.command sdist_dsc --debian-version=${DEB_VERSION}
