@@ -22,7 +22,7 @@ python3 ./setup.py build
 Just run `build.sh` and make sure you installed `fakeroot` package.
 ```
 sudo apt update
-sudo apt install fakeroot
+sudo apt install fakeroot python3-setuptools python3-stdeb python3-all-dev libsystemd-dev
 ./build.sh
 ```
 
