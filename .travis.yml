@@ -8,6 +8,7 @@ addons:
      - fakeroot 
      - python-all
      - python3-all-dev
+     - libsystemd-dev
   
 #before_install:
 #  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
