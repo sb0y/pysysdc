@@ -1,0 +1,18 @@
+dist: xenial
+#language: cpp
+  
+#addons:
+#  apt:
+#    packages:
+#     - debhelper
+#     - pbuilder 
+#     - debootstrap 
+#     - devscripts
+  
+#before_install:
+#  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+#  - sudo apt-get update -qq
+
+
+script:
+    - build.sh 
