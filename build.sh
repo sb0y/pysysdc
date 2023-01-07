@@ -12,7 +12,7 @@ DEB_VERSION=$(echo $BUILD_BUILDNUMBER | sed 's/^.*\-//')
 sed -i "s/%VERSION%/${PYT_VERSION}/" pysysdc/__version__.py stdeb.cfg
 
 ./clean.sh
-SETUPTOOLS_USE_DISTUTILS=stdlib python3 ./setup.py --command-packages=stdeb.command sdist_dsc --debian-version=${DEB_VERSION}
+SETUPTOOLS_USE_DISTUTILS=local python3 ./setup.py --command-packages=stdeb.command sdist_dsc --debian-version=${DEB_VERSION}
 cp DEBIAN/postinst deb_dist/pysysdc*/debian/
 cp DEBIAN/postrm deb_dist/pysysdc*/debian/
 cp DEBIAN/preinst deb_dist/pysysdc*/debian/
