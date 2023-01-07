@@ -1,6 +1,9 @@
 [tool.cibuildwheel]
+skip = "musllinux*"
 manylinux-x86_64-image = "manylinux_2_24"
 manylinux-i686-image = "manylinux_2_24"
+#musllinux-x86_64-image = "musllinux_1_1"
+#musllinux-i686-image = "musllinux_1_1"
 
 [tool.cibuildwheel.linux]
 before-all = [
