@@ -1,2 +1,2 @@
 [tool.cibuildwheel.linux]
-before-all = "yum install -y systemd-devel"
+before-all = "apt-get install -y libsystemd-dev"
