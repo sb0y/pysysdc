@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
      - python3-stdeb
+     - python3-setuptools
      - fakeroot 
      - python3-all
      - python3-all-dev
