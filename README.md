@@ -1,4 +1,5 @@
-# pysysdc [![Build Status](https://app.travis-ci.com/sb0y/pysysdc.svg?branch=main)](https://app.travis-ci.com/sb0y/pysysdc)
+# pysysdc [![Travis Build Status](https://app.travis-ci.com/sb0y/pysysdc.svg?branch=main)](https://app.travis-ci.com/sb0y/pysysdc) ![Github Actions Status](https://github.com/sb0y/pysysdc/actions/workflows/python-publish.yml/badge.svg)
+
 
 Python3.5+ sd-bus adapter which allows to manage services, publish and call methods.
 
