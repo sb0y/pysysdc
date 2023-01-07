@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from setuptools import setup, Extension
 from pathlib import Path
 import re
@@ -10,8 +11,7 @@ with open('pysysdc/__version__.py', 'r') as f:
 
 VERSION = re.sub(r'[^0-9.]+', '', VERSION)
 
-this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text()
+long_description = (Path(os.getcwd()) / "README.md").read_text()
 
 setup(
 	name="pysysdc",
@@ -22,7 +22,7 @@ setup(
 	author_email="andrey@bagrintsev.me",
 	long_description_content_type='text/markdown',
 	author=[
-		"Andrey Bagrintsev <andrey@bagrintsev.me>"
+		"Andrey Bagrintsev"
 	],
 	url="https://github.com/sb0y/pysysdc",
 	license="BSD",
