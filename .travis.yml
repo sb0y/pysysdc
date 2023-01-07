@@ -12,6 +12,7 @@ addons:
     packages:
      - python3-stdeb
      - fakeroot 
+     - python3-all
      - python3-all-dev
      - libsystemd-dev
   
