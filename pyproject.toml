@@ -3,5 +3,5 @@ manylinux-x86_64-image = "manylinux_2_24"
 
 [tool.cibuildwheel.linux]
 before-all = [
-  "yum install systemd-devel -y",
+  "apt-get install -y libsystemd-dev",
 ]
