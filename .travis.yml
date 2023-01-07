@@ -1,13 +1,10 @@
 dist: xenial
-language: python
+language: c
   
-#addons:
-#  apt:
-#    packages:
-#     - debhelper
-#     - pbuilder 
-#     - debootstrap 
-#     - devscripts
+addons:
+  apt:
+    packages:
+     - python3-stdeb
   
 #before_install:
 #  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
