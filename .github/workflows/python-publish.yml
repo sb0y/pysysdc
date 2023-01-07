@@ -40,7 +40,7 @@ jobs:
       with:
         python-versions: 'cp310-cp310 cp311-cp311'
         build-requirements: 'libsystemd-devel'
-        #system-packages: 'libsystemd-dev'
+        system-packages: 'libsystemd-devel'
         #package-path: 'pysysdc'
         #pip-wheel-args: '-w ./dist --no-deps'
         user: __token__
