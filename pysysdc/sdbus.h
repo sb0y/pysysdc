@@ -3,7 +3,11 @@
 //extern sd_bus *bus;
 #include "helpers.h"
 
-struct dc_method_data;
+struct dc_method_data {
+	char method_return[100];
+	char method_args[100];
+	char method_name[255];
+};
 
 int service_register(
 	const char *path, 

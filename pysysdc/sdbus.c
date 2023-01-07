@@ -13,11 +13,7 @@
 
 #define METHOD_HNDLR int (*func_ptr)(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 
-struct dc_method_data {
-	char method_return[100];
-	char method_args[100];
-	char method_name[255];
-} method_data;
+struct dc_method_data method_data{0};
 
 void *c_func = NULL;
 struct sd_bus_vtable *methods_vtable = NULL;
