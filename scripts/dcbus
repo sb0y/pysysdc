@@ -1,0 +1,98 @@
+#!/bin/bash
+
+function show_help()
+{
+	# Display Help
+	echo 'The `dcbus` provides a way to call methods from dc services.'
+	echo
+	echo 'Syntax: dcbus [-d|-m]'
+	echo "Example: dcbus --domain dc.cloud.auth --method Token"
+	echo "Shorter: dcbus -d dc.cloud.auth -m Token"
+	echo "options:"
+	echo "[--domain|-d]	Set bus domain."
+	echo "[--method|-m]	Set bus method."
+	echo "[--first_arg|-f] First argument for method (optional)."
+	echo "[--second_arg|-s] Second argument for method (optional)."
+}
+
+function parse_reply()
+{
+	echo $1 | grep -o '"[^"]\+"' | tr '"' ' ' | xargs
+}
+
+domain=''
+method=''
+first_arg=''
+second_arg=''
+
+POSITIONAL=()
+while [[ $# -gt 0 ]];
+do
+	key="$1"
+
+	case $key in
+		-d|--domain)
+			domain="$2"
+			shift # past argument
+			shift # past value
+		;;
+		-m|--method)
+			method="$2"
+			shift # past argument
+			shift # past value
+		;;
+		-f|--first_arg)
+			first_arg="$2"
+			shift # past argument
+			shift # past value
+		;;
+		-s|--second_arg)
+			second_arg="$2"
+			shift # past argument
+			shift # past value
+		;;
+		*)
+			shift
+		;;
+	esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [[ -z "${domain}" ]];
+then
+	>&2 echo 'Error: `domain` variable is required'
+	echo
+	show_help
+	exit 1
+fi
+
+if [[ -z "${method}" ]];
+then
+	>&2 echo 'Error: `method` variable is required'
+	echo
+	show_help
+	exit 1
+fi
+
+namespace=`echo $domain | tr '.' '/'`
+namespace="/${namespace}"
+if [[ ! -z "${first_arg}" ]];
+then
+	first_arg="\"${first_arg}\""
+fi
+
+if [[ ! -z "${second_arg}" ]];
+then
+	second_arg="\"${second_arg}\""
+fi
+
+out=`busctl --system call ${domain} ${namespace} ${domain} ${method} s ${first_arg} ${second_arg}`
+
+ret=$?
+
+if [[ $ret == 0 ]]; 
+then
+	parse_reply "${out}"
+fi
+
+exit $ret

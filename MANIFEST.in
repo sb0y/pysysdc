@@ -1,0 +1,8 @@
+include pysysdc/python_runner.h
+include pysysdc/sdbus.h
+include pysysdc/dc_error_handling.h
+include pysysdc/systemd_methods.h
+include pysysdc/helpers.h
+include pysysdc/connect.h
+include scripts/dcbus
+include etc/dbus-1/system-local.conf
