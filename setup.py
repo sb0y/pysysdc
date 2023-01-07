@@ -15,7 +15,7 @@ setup(
 	description="Python bindings for sd-bus",
 	long_description='',
 	include_package_data=True,
-	author_email="andrey@bagrintsev.me"
+	author_email="andrey@bagrintsev.me",
     author=[
 		"Andrey Bagrintsev <andrey@bagrintsev.me>"
 	],
