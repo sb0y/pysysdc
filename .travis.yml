@@ -23,4 +23,10 @@ addons:
 script: |
     ver="$TRAVIS_TAG"
     export BUILD_BUILDNUMBER="${ver:1}"
-    ./build.sh 
+    ./build.sh
+ 
+deploy:
+    provider: launchpad
+    slug: "~andraentel/pysysdc/main"
+    oauth_token: "$lp_oauth_token"
+    oauth_token_secret: "$lp_oauth_token_secret"
