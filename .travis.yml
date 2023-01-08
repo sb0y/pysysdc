@@ -27,6 +27,10 @@ script: |
  
 deploy:
     provider: launchpad
-    slug: "~andraentel/pysysdc/main"
+    slug: "~andreantel/pysysdc/main"
     oauth_token: "$lp_oauth_token"
     oauth_token_secret: "$lp_oauth_token_secret"
+    on:
+        branches:
+            only:
+                - main
