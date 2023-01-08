@@ -11,21 +11,6 @@ on: [push, pull_request]
 #       - published
 
 jobs:
-  tag_version:
-    name: Tag sem version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build version number
-        uses: MCKanpolat/auto-semver-action@1.0.5
-        id: versioning
-        with:
-          releaseType: patch 
-          incrementPerCommit: false
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Next Release Number
-        run: echo ${{ steps.versioning.outputs.version }}
-
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -55,6 +40,23 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
+  
+  tag_version:
+    name: Tag Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout  
+        uses: actions/checkout@v2  
+        with:  
+            fetch-depth: 0  
+            
+      - name: Version  
+        id: version  
+        uses: juliansangillo/tag-version@v1  
+        with:  
+            production-branch: main  
+            test-branch: testing  
+            dev-branch: develop  
 
   upload_pypi:
     needs: [build_wheels, build_sdist]
