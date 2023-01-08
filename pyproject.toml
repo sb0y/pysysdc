@@ -1,4 +1,7 @@
 [project]
+name = "pysysdc"
+readme = "README.md"
+license = {file = "LICENSE"}
 authors = [
     {name = "Andrey Bagrintsev", email = "andrey@bagrintsev.me"},
     {name = "Anatolii Cheban", email = "1timkill@gmail.com"},
