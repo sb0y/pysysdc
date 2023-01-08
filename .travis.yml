@@ -13,12 +13,13 @@ matrix:
 cache: apt
 
 addons:
-  apt:
-    packages:
-     - python3-stdeb
-     - fakeroot 
-     - python3-all-dev
-     - libsystemd-dev
+    artifacts: true
+    apt:
+        packages:
+            - python3-stdeb
+            - fakeroot 
+            - python3-all-dev
+            - libsystemd-dev
 
 script: |
     ver="$TRAVIS_TAG"
