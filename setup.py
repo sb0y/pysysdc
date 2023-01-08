@@ -16,14 +16,14 @@ long_description = (Path(os.getcwd()) / "README.md").read_text()
 setup(
 	name="pysysdc",
 	version=VERSION,
-	description="Python bindings for sd-bus",
+	description="Python C library for SD-Bus communication",
 	long_description=long_description,
 	include_package_data=True,
-	author_email="andrey@bagrintsev.me",
+	author_email="andrey@bagrintsev.me, avdieev@gmail.com",
 	long_description_content_type='text/markdown',
-	author=[
-		"Andrey Bagrintsev"
-	],
+    author="Andrey Bagrintsev, Oleksandr Avdieiev",
+	maintainer="Andrey Bagrintsev",
+	maintainer_email="andrey@bagrintsev.me",
 	url="https://github.com/sb0y/pysysdc",
 	license="BSD",
 	packages=["pysysdc"],

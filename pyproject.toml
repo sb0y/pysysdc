@@ -1,3 +1,12 @@
+[project]
+authors = [
+    {name = "Andrey Bagrintsev", email = "andrey@bagrintsev.me"},
+    {name = "Oleksandr Avdieiev", email = "avdieev@gmail.com"}
+]
+maintainers = [
+    {name = "Andrey Bagrintsev", email = "andrey@bagrintsev.me"}
+]
+
 [tool.cibuildwheel]
 build = "*-manylinux*"
 manylinux-x86_64-image = "manylinux_2_24"
