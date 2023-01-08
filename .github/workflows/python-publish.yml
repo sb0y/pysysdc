@@ -56,6 +56,8 @@ jobs:
           WITH_V: false
           DEFAULT_BUMP: patch
           TAG_CONTEXT: branch
+          INITIAL_VERSION: 'v1.0.0'
+          VERBOSE: true
       - name: test
         run: echo ${{ steps.tag_version.outputs.new_tag }}
 
