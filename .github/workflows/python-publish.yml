@@ -42,21 +42,19 @@ jobs:
           path: dist/*.tar.gz
   
   tag_version:
-    name: Tag Version
+  # example 1: on push to master
+  name: Bump version
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout  
-        uses: actions/checkout@v3  
-        with:  
-            fetch-depth: 0  
-            
-      - name: Version  
-        id: version  
-        uses: juliansangillo/tag-version@v1  
-        with:  
-            production-branch: main  
-            test-branch: testing  
-            dev-branch: develop  
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.55.0 # Don't use @master unless you're happy to test the latest version
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: false
 
   upload_pypi:
     needs: [build_wheels, build_sdist]
