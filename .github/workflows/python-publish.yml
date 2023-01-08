@@ -54,7 +54,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
-          DEFAULT_BUMP: patch
+          DEFAULT_BUMP: patch 
+      - run: echo ${{ new_tag }}
 
   upload_pypi:
     needs: [build_wheels, build_sdist]
