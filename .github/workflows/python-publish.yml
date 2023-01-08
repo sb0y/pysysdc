@@ -37,8 +37,8 @@ jobs:
 
       - name: Build sdist
         run: |
-          echo "${{ needs.ver_tag.outputs.new_tag }}"
-          sed -i "s/%VERSION%/${{ needs.ver_tag.outputs.new_tag }}/" pysysdc/__version__.py stdeb.cfg
+          echo "${{ needs.tag_version.outputs.sem_ver }}"
+          sed -i "s/%VERSION%/${{ needs.tag_version.outputs.sem_ver }}/" pysysdc/__version__.py stdeb.cfg
           pipx run build --sdist
 
       - uses: actions/upload-artifact@v3
@@ -47,6 +47,8 @@ jobs:
   
   tag_version:
     runs-on: ubuntu-latest
+    outputs:
+      sem_ver: ${{ steps.ver_tag.outputs.new_tag }}
     name: Bump version
     steps:
       - uses: actions/checkout@v3
