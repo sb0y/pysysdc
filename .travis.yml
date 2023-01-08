@@ -26,11 +26,9 @@ script: |
     ./build.sh
  
 deploy:
-    provider: launchpad
-    slug: "~andreantel/pysysdc/main"
-    oauth_token: "$lp_oauth_token"
-    oauth_token_secret: "$lp_oauth_token_secret"
-    on:
-        branches:
-            only:
-                - main
+    - provider: launchpad
+      slug: "~andreantel/pysysdc/main"
+      oauth_token: "$lp_oauth_token"
+      oauth_token_secret: "$lp_oauth_token_secret"
+      on: 
+        branch: main
