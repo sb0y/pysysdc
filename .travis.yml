@@ -22,6 +22,7 @@ addons:
             - python3-all-dev
             - libsystemd-dev
             - dput
+            - gpg
 
 script: |
     ver="$TRAVIS_TAG"
@@ -34,7 +35,7 @@ script: |
     echo "incoming = ~andreantel/ubuntu/pysysdc/" >> ~/.dput.cf
     echo "login = andreantel" >> ~/.dput.cf
     echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
-    dput --unchecked my-ppa *_source.changes
+    dput my-ppa *_source.changes
  
 #deploy:
 #    - provider: launchpad
