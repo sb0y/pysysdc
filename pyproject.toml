@@ -1,6 +1,7 @@
 [project]
 authors = [
     {name = "Andrey Bagrintsev", email = "andrey@bagrintsev.me"},
+    {name = "Anatolii Cheban", email = "1timkill@gmail.com"},
     {name = "Oleksandr Avdieiev", email = "avdieev@gmail.com"}
 ]
 maintainers = [
