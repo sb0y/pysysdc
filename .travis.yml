@@ -13,8 +13,8 @@ matrix:
 cache: apt
 
 addons:
-    artifacts: 
-         debug: true
+#    artifacts: 
+#         debug: true
     apt:
         packages:
             - python3-stdeb
