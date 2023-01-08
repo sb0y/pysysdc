@@ -22,20 +22,20 @@ addons:
             - python3-all-dev
             - libsystemd-dev
             - dput
-            - gpg
+            #- gpg
 
 script: |
     ver="$TRAVIS_TAG"
     export BUILD_BUILDNUMBER="${ver:1}"
     ./build.sh
-    cd deb_dist/
-    echo "[my-ppa]" > ~/.dput.cf
-    echo "fqdn = ppa.launchpad.net" >> ~/.dput.cf
-    echo "method = sftp" >> ~/.dput.cf
-    echo "incoming = ~andreantel/ubuntu/pysysdc/" >> ~/.dput.cf
-    echo "login = andreantel" >> ~/.dput.cf
-    echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
-    dput my-ppa *_source.changes
+    #cd deb_dist/
+    #echo "[my-ppa]" > ~/.dput.cf
+    #echo "fqdn = ppa.launchpad.net" >> ~/.dput.cf
+    #echo "method = sftp" >> ~/.dput.cf
+    #echo "incoming = ~andreantel/ubuntu/pysysdc/" >> ~/.dput.cf
+    #echo "login = andreantel" >> ~/.dput.cf
+    #echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
+    #dput my-ppa *_source.changes
  
 #deploy:
 #    - provider: launchpad
