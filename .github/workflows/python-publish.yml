@@ -37,8 +37,8 @@ jobs:
 
       - name: Build sdist
         run: |
-          echo $PWD
-          ls
+          echo "${{ needs.ver_tag.outputs.new_tag }}"
+          sed -i "s/%VERSION%/${{ needs.ver_tag.outputs.new_tag }}/" pysysdc/__version__.py stdeb.cfg
           pipx run build --sdist
 
       - uses: actions/upload-artifact@v3
