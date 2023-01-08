@@ -26,11 +26,10 @@ script: |
     ver="$TRAVIS_TAG"
     export BUILD_BUILDNUMBER="${ver:1}"
     ./build.sh
-    mv ../*.deb . 
-    ls deb_dist/
  
 deploy:
     - provider: launchpad
+      local-dir: deb_dist
       slug: "~andreantel/pysysdc/+git/main"
       oauth_token: $LP_OAUTH_TOKEN
       oauth_token_secret: $LP_OAUTH_TOKEN_SECRET
