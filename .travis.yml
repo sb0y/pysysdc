@@ -26,6 +26,7 @@ script: |
     ver="$TRAVIS_TAG"
     export BUILD_BUILDNUMBER="${ver:1}"
     ./build.sh
+    mv ../*.deb . 
     ls
  
 deploy:
