@@ -46,8 +46,8 @@ jobs:
     name: Bump version
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: '0'
+        #with:
+        #  fetch-depth: '50'
 
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.55.0 # Don't use @master unless you're happy to test the latest version
@@ -55,7 +55,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
           DEFAULT_BUMP: patch
-          BRANCH_HISTORY: compare
       - name: test
         run: echo ${{ steps.tag_version.outputs.new_tag }}
 
