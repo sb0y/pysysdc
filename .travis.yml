@@ -29,6 +29,6 @@ deploy:
     - provider: launchpad
       slug: "~andreantel/pysysdc/+git/main"
       oauth_token: $LP_OAUTH_TOKEN
-      oauth_token_secret: $LP_OUATH_TOKEN_SECRET
+      oauth_token_secret: $LP_OAUTH_TOKEN_SECRET
       on: 
         tags: true
