@@ -27,7 +27,7 @@ script: |
     export BUILD_BUILDNUMBER="${ver:1}"
     ./build.sh
     mv ../*.deb . 
-    ls
+    ls deb_dist/
  
 deploy:
     - provider: launchpad
