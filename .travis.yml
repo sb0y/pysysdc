@@ -20,5 +20,7 @@ addons:
      - python3-all-dev
      - libsystemd-dev
 
-script:
-    - ./build.sh 
+script: |
+    ver="$TRAVIS_TAG"
+    export BUILD_BUILDNUMBER="${ver:1}"
+    ./build.sh 
