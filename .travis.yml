@@ -21,17 +21,25 @@ addons:
             - fakeroot 
             - python3-all-dev
             - libsystemd-dev
+            - dput
 
 script: |
     ver="$TRAVIS_TAG"
     export BUILD_BUILDNUMBER="${ver:1}"
     ./build.sh
-    mv deb_dist/* .
+    cd deb_dist/
+    echo "[my-ppa]" > ~/.dput.cf
+    echo "fqdn = ppa.launchpad.net" >> ~/.dput.cf
+    echo "method = sftp" >> ~/.dput.cf
+    echo "incoming = ~andreantel/ubuntu/pysysdc/" >> ~/.dput.cf
+    echo "login = andreantel" >> ~/.dput.cf
+    echo "allow_unsigned_uploads = 0" >> ~/.dput.cf
+    dput my-ppa *_source.changes
  
-deploy:
-    - provider: launchpad
-      slug: "~andreantel/pysysdc/+git/main"
-      oauth_token: $LP_OAUTH_TOKEN
-      oauth_token_secret: $LP_OAUTH_TOKEN_SECRET
-      on: 
-        tags: true
+#deploy:
+#    - provider: launchpad
+#      slug: "~andreantel/pysysdc/+git/main"
+#      oauth_token: $LP_OAUTH_TOKEN
+#      oauth_token_secret: $LP_OAUTH_TOKEN_SECRET
+#      on: 
+#        tags: true
