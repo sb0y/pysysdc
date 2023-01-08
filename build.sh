@@ -1,14 +1,14 @@
 #/bin/bash -x
 
-if [ -z ${BUILD_BUILDNUMBER} ]
+if [[ -z "${BUILD_BUILDNUMBER}" ]];
 then
 	BUILD_BUILDNUMBER=$(grep "semver:" azure-pipelines.yml | awk '{ print $2 }').0-local
 fi
 
-PYT_VERSION=$(echo $BUILD_BUILDNUMBER | sed 's/\-.*$//')
-DEB_VERSION=$(echo $BUILD_BUILDNUMBER | sed 's/^.*\-//')
+PYT_VERSION=`echo $BUILD_BUILDNUMBER | sed 's/\-.*$//'`
+DEB_VERSION=`echo $BUILD_BUILDNUMBER | sed 's/^.*\-//'`
 
-# Set  version in files
+# Set version in files
 sed -i "s/%VERSION%/${PYT_VERSION}/" pysysdc/__version__.py stdeb.cfg
 
 # https://github.com/pypa/setuptools/issues/3278
