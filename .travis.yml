@@ -31,4 +31,4 @@ deploy:
       oauth_token: "$lp_oauth_token"
       oauth_token_secret: "$lp_oauth_token_secret"
       on: 
-        branch: main
+        tags: true
