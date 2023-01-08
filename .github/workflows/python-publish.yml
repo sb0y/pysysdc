@@ -56,7 +56,7 @@ jobs:
           WITH_V: false
           DEFAULT_BUMP: patch 
       - name: test
-        run: echo ${{ new_tag }}
+        run: echo ${{ steps.tag_version.outputs.new_tag }}
 
   upload_pypi:
     needs: [build_wheels, build_sdist]
