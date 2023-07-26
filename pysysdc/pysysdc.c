@@ -515,11 +515,11 @@ static struct PyModuleDef _coremodule = {
 
 PyMODINIT_FUNC PyInit__pysysdc(void)
 {
-	if(!Py_IsInitialized())
+	#if PY_VERSION_HEX < 0x030A0000
+    if(!Py_IsInitialized())
 	{
 		Py_Initialize();
 	}
-	#if PY_VERSION_HEX < 0x030A0000
 	if(!PyEval_ThreadsInitialized())
 	{
 		PyEval_InitThreads();
