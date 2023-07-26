@@ -7,9 +7,7 @@ manylinux-i686-image = "manylinux_2_24"
 
 [tool.cibuildwheel.linux]
 before-all = [
-  "sed -i -e 's/deb.debian.org/archive.debian.org/g'
-          -e 's|security.debian.org|archive.debian.org/|g'
-          -e '/stretch-updates/d' /etc/apt/sources.list",
+  "sed -i -e 's/deb.debian.org/archive.debian.org/g' -e 's|security.debian.org|archive.debian.org/|g' -e '/stretch-updates/d' /etc/apt/sources.list",
   "apt-get update -y",
   "apt-get install -y libsystemd-dev"
 ]
