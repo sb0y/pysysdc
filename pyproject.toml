@@ -7,6 +7,6 @@ manylinux-i686-image = "manylinux_2_24"
 
 [tool.cibuildwheel.linux]
 before-all = [
-  "apt-get update -y",
-  "apt-get install -y libsystemd-dev"
+  "apt-get update -y || true",
+  "apt-get install -y libsystemd-dev || true"
 ]
