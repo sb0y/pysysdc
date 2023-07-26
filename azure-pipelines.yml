@@ -1,36 +1,79 @@
+# trigger:
+#   branches:
+#     include:
+#     - refs/heads/testing/*
+    # - refs/heads/hotfix/*
+# pr: none
+
 pool:
   name: DC Box Build Fabric
 
 variables:
+  #Enable for debugging pipeline
   # system.debug: True
-  semver: 1.1
+
+  major: 1
+  minor: 3
+  semver: $(major).$(minor)
+
   AUTHOR: "Andrey Bagrintsev"
   EMAIL: "a.bagrintsev@petrosoftinc.com"
   PACKAGE_NAME: "pysysdc"
 
 stages:
-# Versioning branch builds
+
+# Versioning for testing and release branch builds
+
+  - stage:
+    displayName: Build_Master_Version_Number
+    condition: or
+     (
+         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+         eq(variables['Build.SourceBranch'], 'refs/heads/release')
+     )
+    jobs:
+    - job: Build_Master_Version_Number
+      variables:
+        patch: $[counter(variables['minor'], 0)]
+      steps:
+      - bash: |
+             echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)-$(Build.BuildID)"
+        name: SetMasterBuildName
+
+
+# Versioning dev branch builds
   - stage:
     displayName: 'Build Version Number'
-    # condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+    condition: |
+      and
+      (
+        ne(variables['Build.SourceBranch'], 'refs/heads/release'),
+        ne(variables['Build.SourceBranch'], 'refs/heads/master')
+      )
     jobs:
     - job: Build_Version_Number
       variables:
-        stageName: other
-        patch_dev: $[counter(format('{0}_{1}', variables['semver'], variables['stageName']), 0)]
-        version: $(semver).$(patch_dev)-$(Build.BuildID)
+        #Pull Request version
+        prpatch: $[counter(variables['system.pullrequest.pullrequestid'], 0)]
+        #Develop branch version
+        patch: $[counter(variables['build.sourcebranchname'], 0)]
+        version: $(semver).$(patch)-$(Build.BuildID)
       steps:
-      - bash: |
-           echo "##vso[build.updatebuildnumber]$(version)"
-        name: SetDevBuildName
-
+        - bash: |
+             echo "##vso[build.updatebuildnumber]$(major).$(minor)-PullRequest.$(prpatch)"
+          condition: eq(variables['Build.Reason'], 'PullRequest')
+          name: SetPRBuildName
+        - bash: |
+             echo "##vso[build.updatebuildnumber]$(version)"
+          condition: ne(variables['Build.Reason'], 'PullRequest')
+          name: SetDevelopBuildName
 
 # Stage for building your application
-#Build for Ubuntu 16.04
   - stage:
-    displayName: 'Build for Ubuntu 16'
+    displayName: 'Build package'
     condition: always()
 
+#Build for UBUntU 16
     jobs:
     - job: Build_Steps_16
       displayName: 'Build for 16.04'
@@ -48,22 +91,16 @@ stages:
           displayName: 'Build package'
           targetType: 'inline'
           script: |
-            pwd
             ./build.sh
-            cp -f deb_dist/*_amd64.deb $(Build.ArtifactStagingDirectory)
+            cp -f deb_dist/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_amd64.deb $(Build.ArtifactStagingDirectory)/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_16-04_amd64.deb
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact: drop'
 
-      - script: 'rm -rf ..?* .[!.]* *'
+      - script: 'rm -rf ..?* .[!.]* * ../dc-azure*'
         displayName: Clean
 
-#Build for Ubuntu 20.04
-  - stage:
-    displayName: 'Build for Ubuntu 20'
-    condition: always()
-
-    jobs:
+#Build for UBUNTU 20
     - job: Build_Steps_20
       displayName: 'Build for 20.04'
       pool:
@@ -71,6 +108,7 @@ stages:
         demands: Agent.Name -equals 20
 
       steps:
+
       - checkout: self
         clean: true
         persistCredentials: true
@@ -81,42 +119,54 @@ stages:
           targetType: 'inline'
           script: |
             pwd
+            export BUILD_BUILDNUMBER="$(Build.BuildNumber)"
             ./build.sh
             cp -f deb_dist/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_amd64.deb $(Build.ArtifactStagingDirectory)/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_20-04_amd64.deb
 
-      - task: CopyFilesOverSSH@0
-        displayName: 'Securely copy files to the remote machine'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+      
+      - script: 'rm -rf ..?* .[!.]* * ../dc-azure*'
+        displayName: Clean
+
+#Build for UBUNTU 22
+    - job: Build_Steps_22
+      displayName: 'Build for 22.04'
+      pool:
+        name: DC Box Build Fabric
+        demands: Agent.Name -equals 22_amd64
+
+      steps:
+
+      - checkout: self
+        clean: true
+        persistCredentials: true
+
+      - task: Bash@3
         inputs:
-          sshEndpoint: 'rk repo'
-          sourceFolder: '$(Build.ArtifactStagingDirectory)'
-          contents: "python3-$(PACKAGE_NAME)_$(Build.BuildNumber)_20-04_amd64.deb"
-          targetFolder: /home/user/repos/20.04
+          displayName: 'Build package'
+          targetType: 'inline'
+          script: |
+            pwd
+            export BUILD_BUILDNUMBER="$(Build.BuildNumber)"
+            ./build.sh
+            cp -f deb_dist/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_amd64.deb $(Build.ArtifactStagingDirectory)/python3-'$(PACKAGE_NAME)'_'$(Build.BuildNumber)'_22-04_amd64.deb
 
-      - task: SSH@0
-        displayName: 'Run package list update at RK repo server'
-        inputs:
-          sshEndpoint: 'rk repo'
-          commands: '/home/user/repos/scripts/publish.sh --repo=''20.04'' --commit=''$(Build.SourceVersion)'''
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+      
+      - script: 'rm -rf ..?* .[!.]* * ../dc-azure*'
+        displayName: Clean
 
-      # - task: PublishBuildArtifacts@1
-      #   displayName: 'Publish Artifact: drop'
-
-      # - script: "rm -rf ..?* .[!.]* * ../'$(PACKAGE_NAME)'*"
-      #   displayName: Clean
-
-#Build for Ubuntu 20 ARM
-  - stage:
-    displayName: 'Build for Ubuntu ARM'
-    condition: always()
-
-    jobs:
+#Build for ARM64 arch
     - job: Build_Steps_ARM
       displayName: 'Build for ARM64'
       pool:
         name: DC Box Build Fabric
-        demands: Agent.Name -equals arm64
+        demands: Agent.Name -equals 20_arm64
 
       steps:
+
       - checkout: self
         clean: true
         persistCredentials: true
@@ -126,20 +176,20 @@ stages:
           displayName: 'Build package'
           targetType: 'inline'
           script: |
-            pwd
             ./build.sh
             cp -f deb_dist/*_arm64.deb $(Build.ArtifactStagingDirectory)
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact: drop'
 
-      - script: 'rm -rf ..?* .[!.]* *'
+      - script: 'rm -rf ..?* .[!.]* * ../dc-azure*'
         displayName: Clean
+
 
 #Build and push tag
   - stage:
     displayName: 'Create build tag'
-    condition: always()
+    condition: ne(variables['Build.Reason'], 'PullRequest')
 
     jobs:
     - job: Create_Build_Tag
@@ -157,4 +207,4 @@ stages:
         env:
           BuildTag: $(PACKAGE_NAME)_$(Build.BuildNumber)
         displayName: 'Tag build'
-        condition: succeeded()
+        condition: ne(variables['Build.Reason'], 'PullRequest')

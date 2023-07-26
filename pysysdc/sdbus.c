@@ -2,49 +2,69 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
+//#include <stdarg.h>
 
-#include <systemd/sd-bus.h>
-
-#include "python_runner.h"
 #include "sdbus.h"
-#include "dc_error_handling.h"
-#include "helpers.h"
 #include "connect.h"
+#include "helpers.h"
+#include "python_runner.h"
+#include "dc_error_handling.h"
 
 #define METHOD_HNDLR int (*func_ptr)(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 
-struct dc_method_data method_data = {0};
+static dc_method_data method_data = {
+	.method_return = {0},
+	.method_args = {0},
+	.method_name = {0}
+};
 
-void *c_func = NULL;
-struct sd_bus_vtable *methods_vtable = NULL;
-sd_bus_slot *g_slot = NULL;
+static void *c_func = NULL;
+static struct sd_bus_vtable *methods_vtable = NULL;
+static sd_bus_slot *g_slot = NULL;
 
-static int method_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) 
+static int method_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
-	char *operation = NULL;
+	char *result = NULL;
 	int r = 0;
+	int py_return_code = -1;
 
-	if(userdata == NULL)
-	{
-		set_dc_error("userdata is NULL");
-		return -10;
-	}
+	assert(userdata == NULL);
 
-	struct dc_method_data *md = (struct dc_method_data*)(char*)userdata;
+	struct dc_method_data *md = (dc_method_data*)(char*)userdata;
 
 	/* Read the parameters */
-	r = sd_bus_message_read(m, md->method_args, &operation);
-	//fprintf(stdout, "Requested operation: '%s'\n", operation);
-	if (r < 0) 
+	//fprintf(stdout, "test: '%s'\n", md->method_args);
+	size_t args_len = strlen(md->method_args);
+	char *args[args_len];
+	for (size_t i = 0; i < args_len; i++)
 	{
-		set_dc_error("Failed to parse parameters");
-		return r;
+		args[i] = NULL;
+		r = sd_bus_message_read_basic(m, md->method_args[i], &args[i]);
+		//fprintf(stdout, "arg: '%s'\n", args[i]);
+		if (r < 0) 
+		{
+			set_dc_error(FAILED_TO_PARSE_PARAMETERS);
+			return r;
+		}
 	}
 
-	char *result = NULL;
-	int op_result = run_python_func(c_func, operation, &result);
+	//fprintf(stdout, "before python 1: '%s'\n", args[0]);
+	py_return_code = run_python_func(md->method_args, c_func, args, &result);
 
-	if (op_result)
+	//fprintf(stdout, "sd_bus_reply_method_return: '%s'\n", md->method_return);
+	r = sd_bus_reply_method_return(m, md->method_return, py_return_code, result);
+	if(r < 0)
+	{
+		set_dc_error(FAILED_TO_REPLY_METHOD_RETURN);
+	}
+
+	if(result)
+		free(result);
+
+	return r;
+
+	/*if (op_result)
 	{
 		int ret = sd_bus_reply_method_return(m, md->method_args, result);
 		if(result)
@@ -55,7 +75,7 @@ static int method_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
 		if(result)
 			free(result);
 		return -EINVAL;
-	}
+	}*/
 }
 
 void init_vtable(const char *method_name, const char *method_return, const char *method_args, METHOD_HNDLR)
@@ -73,22 +93,28 @@ void init_vtable(const char *method_name, const char *method_return, const char 
 
 void init_method_data(const char *method_name, const char *method_return, const char *method_args)
 {
-	strcpy(method_data.method_name, method_name);
-	strcpy(method_data.method_return, method_return);
-	strcpy(method_data.method_args, method_args);
+	memset(method_data.method_name, 0, METHOD_NAME_SIZE);
+	memset(method_data.method_return, 0, METHOD_RETURN_SIZE);
+	memset(method_data.method_args, 0, METHOD_ARGS_SIZE);
+	assert(strlen(method_name) > METHOD_NAME_SIZE);
+	memcpy(method_data.method_name, method_name, METHOD_NAME_SIZE);
+	assert(strlen(method_return) > METHOD_RETURN_SIZE);
+	memcpy(method_data.method_return, method_return, METHOD_RETURN_SIZE);
+	assert(strlen(method_args) > METHOD_ARGS_SIZE);
+	memcpy(method_data.method_args, method_args, METHOD_ARGS_SIZE);
 }
 
-int listen(void)
+int listen(sd_bus *bus)
 {
 	int r = 0;
 
 	for (;;) 
 	{
 		/* Process requests */
-		r = sd_bus_process(acquire_gbus(), NULL);
+		r = sd_bus_process(bus, NULL);
 		if (r < 0) 
 		{
-			set_dc_error("Failed to process bus");
+			set_dc_error(FAILED_TO_PROCESS_BUS);
 			return r;
 		}
 
@@ -96,11 +122,10 @@ int listen(void)
 			continue;
 
 		/* Wait for the next request to process */
-		r = sd_bus_wait(acquire_gbus(), (uint64_t) -1);
+		r = sd_bus_wait(bus, (uint64_t) -1);
 		if (r < 0) 
 		{
-			//fprintf(stderr, "Failed to wait on bus: %s\n", strerror(-r));
-			set_dc_error("Failed to wait on bus");
+			set_dc_error(FAILED_TO_WAIT_BUS);
 			return r;
 		}
 	}
@@ -108,7 +133,8 @@ int listen(void)
 	return r;
 }
 
-int service_register(const char *path, 
+int service_register(sd_bus *bus,
+					const char *path, 
 					const char *if_name, 
 					const char *method_name, 
 					const char *method_return, 
@@ -117,24 +143,24 @@ int service_register(const char *path,
 	int r = 0;
 
 	init_method_data(method_name, method_return, method_args);
-	init_vtable(method_data.method_name, method_data.method_return, method_data.method_args, NULL);
+	init_vtable(method_name, method_return, method_args, NULL);
 
 	/* Install the object */
-	r = sd_bus_add_object_vtable(acquire_gbus(),
+	r = sd_bus_add_object_vtable(bus,
 								&g_slot,
 								path,  /* object path */
 								if_name,  /* interface name */
 								methods_vtable,
 								(void*)(&method_data));
 	if (r < 0) {
-		set_dc_error("Failed to issue method call");
+		set_dc_error(FAILED_TO_ADD_OBJECT_VTABLE);
 		return r < 0 ? 0 : 1;
 	}
 
 	/* Take a well-known service name so that clients can find us */
-	r = sd_bus_request_name(acquire_gbus(), if_name, 0);
+	r = sd_bus_request_name(bus, if_name, 0);
 	if (r < 0) {
-		set_dc_error("Failed to acquire service name");
+		set_dc_error(FAILED_TO_ACQUIRE_SERVICE_NAME);
 	}
 
 	return r < 0 ? 0 : 1;
@@ -150,18 +176,16 @@ int b_client(
 	const char *output_sig,
 	const char *first_arg,
 	const char *second_arg,
-	char **return_data
-)
+	char **return_data,
+	int *return_data_code)
 {
 	int r = 0;
+	int py_return_code = -1;
 	const char *return_data_tmp = NULL;
 	sd_bus_error error = SD_BUS_ERROR_NULL;
 	sd_bus_message *m = NULL;
 
-	if(!bus) {
-		set_dc_error("bus value is NULL");
-		goto finish;
-	}
+	assert(bus == NULL);
 
 	/* Issue the method call and store the respons message in m */
 	r = sd_bus_call_method(bus,
@@ -175,31 +199,55 @@ int b_client(
 							first_arg,       /* first argument */
 							second_arg);     /* second argument */
 
-	if (r < 0) 
+	if (r < 0)
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
 	/* Parse the response message */
-	r = sd_bus_message_read(m, output_sig, &return_data_tmp);
+	for(register size_t c = 0; strlen(output_sig) > c; c++)
+	{
+		const char type = output_sig[c];
+		switch(type)
+		{
+			case 'i':
+				r = sd_bus_message_read_basic(m, output_sig[c], &py_return_code);
+			break;
+			case 's':
+				r = sd_bus_message_read_basic(m, output_sig[c], &return_data_tmp);
+			break;
+		}
+
+		if(r < 0)
+			break;
+	}
+
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
-	*return_data = strdup(return_data_tmp);
+	if(return_data_tmp)
+	{
+		*return_data = strdup(return_data_tmp);
+	}
+	if(py_return_code)
+	{
+		*return_data_code = py_return_code;
+	}
 
 	finish:
 		if(error.message)
 			sd_bus_error_free(&error);
-		if(m)
+		if(m && r > 0)
 			sd_bus_message_unref(m);
 
-	return r < 0 ? 0 : 1;
+	//fprintf(stderr, "return: %d\n", r);
+	return r;
 }
 
 int client(
@@ -211,19 +259,28 @@ int client(
 	const char *output_sig,
 	const char *first_arg,
 	const char *second_arg,
-	char **return_data
-)
+	char **return_data,
+	int *return_code)
 {
-	int r = b_client(acquire_gbus(), s_name, s_path, i_name, m_name, input_sig, output_sig, first_arg, second_arg, return_data);
-
-	return r < 0 ? 0 : 1;
+	return b_client(
+		acquire_client_bus(), 
+		s_name, 
+		s_path, 
+		i_name, 
+		m_name, 
+		input_sig, 
+		output_sig, 
+		first_arg, 
+		second_arg, 
+		return_data, 
+		return_code);
 }
 
 void set_cfunc(void *func)
 {
 	if(func == NULL)
 	{
-		set_dc_error("func arg is NULL");
+		set_dc_error(FUNC_ARG_IS_NULL);
 		return;
 	}
 
@@ -233,20 +290,31 @@ void set_cfunc(void *func)
 void init(void)
 {
 	setrlimit_closest(RLIMIT_NOFILE, &RLIMIT_MAKE_CONST(16384));
-	bus_init();
-	//acquire_gbus();
 }
 
-void deinit(void)
+void deinit_client(void)
 {
 	//fprintf(stderr, "deinit call\n");
-	bus_deinit();
+	client_bus_deinit();
+	dc_clean_error();
+}
+
+void deinit_server(void)
+{
+	//fprintf(stderr, "deinit call\n");
+	server_bus_deinit();
 
 	if(g_slot)
+	{
 		sd_bus_slot_unref(g_slot);
+		g_slot = NULL;
+	}
 
 	if(methods_vtable)
+	{
 		free(methods_vtable);
+		methods_vtable = NULL;
+	}
 	
 	dc_clean_error();
 }

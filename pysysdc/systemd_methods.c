@@ -1,4 +1,4 @@
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,7 +18,7 @@ int unit_enable(const char *unit_name, char *return_data[])
 	sd_bus_message *m = NULL;
 	int carries_install_info = -1;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -40,7 +40,7 @@ int unit_enable(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
@@ -53,7 +53,7 @@ int unit_enable(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -83,7 +83,7 @@ int unit_disable(const char *unit_name, char *return_data[])
 	sd_bus_error error = SD_BUS_ERROR_NULL;
 	sd_bus_message *m = NULL;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -104,7 +104,7 @@ int unit_disable(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
@@ -115,7 +115,7 @@ int unit_disable(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -147,7 +147,7 @@ int unit_mask(const char *unit_name, char *return_data[])
 	sd_bus_error error = SD_BUS_ERROR_NULL;
 	sd_bus_message *m = NULL;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -169,7 +169,7 @@ int unit_mask(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
@@ -180,7 +180,7 @@ int unit_mask(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -212,7 +212,7 @@ int unit_unmask(const char *unit_name, char *return_data[])
 	sd_bus_error error = SD_BUS_ERROR_NULL;
 	sd_bus_message *m = NULL;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -233,7 +233,7 @@ int unit_unmask(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
@@ -244,7 +244,7 @@ int unit_unmask(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -274,7 +274,7 @@ int set_hostname(const char *method, const char *value)
 	sd_bus_error error = SD_BUS_ERROR_NULL;
 	int r = 0;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -290,7 +290,7 @@ int set_hostname(const char *method, const char *value)
 
 	if (r < 0) 
 	{
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
 		goto finish;
 	}
 
@@ -308,7 +308,7 @@ int get_hostname(const char *attr, char **ret)
 	int r = 0;
 	char *r_buf = NULL;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -323,13 +323,13 @@ int get_hostname(const char *attr, char **ret)
 
 	if (r < 0)
 	{
-		set_dc_error("Could not get property");
+		set_dc_error(FAILED_TO_GET_PROPERTY);
 		goto finish;
 	}
 
 	r = sd_bus_message_read(reply, "s", &r_buf);
 	if (r < 0) {
-		set_dc_error("Failed to parse response message");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -405,7 +405,7 @@ int unit_status(const char *unit_name, char *return_data[])
 	strcat(path, escaped_unit_name);
 	path[plen] = 0;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -424,13 +424,13 @@ int unit_status(const char *unit_name, char *return_data[])
 	if (r < 0) 
 	{
 		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
 		goto finish;
 	}
 
 	r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_ARRAY, "{sv}");
 	if (r < 0) {
-		set_dc_error("parse error");
+		set_dc_error(FAILED_TO_PARSE_REPLY);
 		goto finish;
 	}
 
@@ -439,19 +439,19 @@ int unit_status(const char *unit_name, char *return_data[])
 
 		r = sd_bus_message_read(reply, "s", &name);
 		/*if (r < 0) {
-			set_dc_error("parse error");
+			set_dc_error(FAILED_TO_PARSE_REPLY);
 			goto finish;
 		}*/
 
 		r = sd_bus_message_peek_type(reply, NULL, &contents);
 		/*if (r < 0) {
-			set_dc_error("parse error");
+			set_dc_error(FAILED_TO_PARSE_REPLY);
 			goto finish;
 		}*/
 
 		r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_VARIANT, contents);
 		/*if (r < 0) {
-			set_dc_error("parse error");
+			set_dc_error(FAILED_TO_PARSE_REPLY);
 			goto finish;
 		}*/
 
@@ -538,7 +538,7 @@ int set_wall_message(const char *wall_message)
 	sd_bus_message *reply = NULL;
 	int r = 0;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -556,7 +556,7 @@ int set_wall_message(const char *wall_message)
 
 	if (r < 0) 
 	{
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
 		goto finish;
 	}
 
@@ -576,7 +576,7 @@ int logind_method(const char *method, const char *wall_message)
 	sd_bus_message *reply = NULL;
 	int r = 0;
 
-	sd_bus *bus = acquire_gbus();
+	sd_bus *bus = acquire_client_bus();
 	if (!bus) {
 		goto finish;
 	}
@@ -597,7 +597,7 @@ int logind_method(const char *method, const char *wall_message)
 
 	if (r < 0) 
 	{
-		set_dc_error(error.message);
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
 		goto finish;
 	}
 
@@ -611,6 +611,137 @@ int logind_method(const char *method, const char *wall_message)
 	return r < 0 ? 0 : 1;
 }
 
+int set_timezone(const char *timezone)
+{
+	sd_bus_error error = SD_BUS_ERROR_NULL;
+	int r = 0;
+
+	sd_bus *bus = acquire_client_bus();
+	if (!bus) {
+		goto finish;
+	}
+
+	if (r < 0) 
+	{
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
+		goto finish;
+	}
+
+	r = sd_bus_call_method(
+					bus,
+					"org.freedesktop.timedate1",
+					"/org/freedesktop/timedate1",
+					"org.freedesktop.timedate1",
+					"SetTimezone",
+					&error,
+					NULL,
+					"sb", timezone, 0);
+
+	if (r < 0) 
+	{
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
+		goto finish;
+	}
+
+	finish:
+		if(error.message)
+			sd_bus_error_free(&error);
+
+	return r < 0 ? 0 : 1;
+}
+
+int daemon_reload(void)
+{
+	sd_bus_error error = SD_BUS_ERROR_NULL;
+	sd_bus_message *reply = NULL;
+	int r = 0;
+
+	sd_bus *bus = acquire_client_bus();
+	if (!bus) {
+		goto finish;
+	}
+
+	r = sd_bus_call_method(
+						bus,
+						"org.freedesktop.systemd1",
+						"/org/freedesktop/systemd1",
+						"org.freedesktop.systemd1.Manager",
+						"Reload",
+						&error,
+						NULL,
+						NULL);
+
+	if (r < 0) 
+	{
+		set_dc_error_msg(FAILED_TO_CALL_METHOD, error.message);
+		goto finish;
+	}
+
+	finish:
+		if(error.message)
+			sd_bus_error_free(&error);
+		
+		if(reply)
+			sd_bus_message_unref(reply);
+
+	return r < 0 ? 0 : 1;
+}
+
+int unit_control(const char *unit_name, const char *action, char **return_data)
+{
+	int r = 0;
+	const char *path = NULL;
+	sd_bus_error error = SD_BUS_ERROR_NULL;
+	sd_bus_message *m = NULL;
+
+	sd_bus *bus = acquire_client_bus();
+	if (!bus) 
+	{
+		goto finish;
+	}
+
+	/* Issue the method call and store the respons message in m */
+	r = sd_bus_call_method(bus,
+							"org.freedesktop.systemd1",		/* service to contact */
+							"/org/freedesktop/systemd1",	/* object path */
+							"org.freedesktop.systemd1.Manager",	/* interface name */
+							action,			/* method name */
+							&error,			/* object to return error in */
+							&m,				/* return message on success */
+							"ss",			/* input signature */
+							unit_name,		/* first argument */
+							"replace");		/* second argument */
+
+	if (r < 0) 
+	{
+		//fprintf(stderr, "Failed to issue method call: %s\n", error.message);
+		set_dc_error_msg(FAILED_TO_ISSUE_METHOD_CALL, error.message);
+		goto finish;
+	}
+
+	/* Parse the response message */
+	r = sd_bus_message_read(m, "o", &path);
+	if (r < 0) 
+	{
+		//fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
+		set_dc_error(FAILED_TO_PARSE_REPLY);
+		goto finish;
+	}
+
+	if(path)
+	{
+		*return_data = strdup(path);
+	}
+
+	finish:
+		if(error.message)
+			sd_bus_error_free(&error);
+		if(m)
+			sd_bus_message_unref(m);
+		
+	return r < 0 ? 0 : 1;
+}
+
 // https://manpages.ubuntu.com/manpages/impish/man5/org.freedesktop.login1.5.html
 int machine_reboot(const char *wall_message)
 {
@@ -621,3 +752,4 @@ int machine_poweroff(const char *wall_message)
 {
 	return logind_method("PowerOff", wall_message);
 }
+

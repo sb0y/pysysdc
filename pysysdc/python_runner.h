@@ -1,3 +1,4 @@
 #pragma once
+#include <stdarg.h>
 
-int run_python_func(void *func, const char *operation, char **buf);
+int run_python_func(const char *args_fmt, void *func, char **args, char **buf);

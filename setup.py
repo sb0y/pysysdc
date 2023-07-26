@@ -4,14 +4,23 @@ import os
 from setuptools import setup, Extension
 from pathlib import Path
 import re
+import subprocess
 
 VERSION = '1.0.0'
 with open('pysysdc/__version__.py', 'r') as f:
-	VERSION = f.read()
+	VERSION = f.read().strip()
 
 VERSION = re.sub(r'[^0-9.]+', '', VERSION)
 
-long_description = (Path(os.getcwd()) / "README.md").read_text()
+long_description = ''
+with open('README.md', 'r') as f:
+	long_description = f.read()
+libsystemd_ver = 'unknown'
+try:
+	libsystemd_ver = subprocess.check_output(['pkg-config', '--modversion', 'libsystemd'], stderr=subprocess.STDOUT, shell=False, universal_newlines=True).strip()
+except Exception as e:
+	print("Failed to detect libsystemd version")
+	print(str(e))
 
 setup(
 	name="pysysdc",
@@ -20,8 +29,8 @@ setup(
 	long_description=long_description,
 	include_package_data=True,
 	author_email="andrey@bagrintsev.me, 1timkill@gmail.com, avdieev@gmail.com",
-	long_description_content_type='text/markdown',
-    author="Andrey Bagrintsev, Anatolii Cheban, Oleksandr Avdieiev",
+	#long_description_content_type='text/markdown',
+	author="Andrey Bagrintsev, Anatolii Cheban, Oleksandr Avdieiev",
 	maintainer="Andrey Bagrintsev",
 	maintainer_email="andrey@bagrintsev.me",
 	url="https://github.com/sb0y/pysysdc",
@@ -48,7 +57,7 @@ setup(
 				"pysysdc/connect.c"
 			],
 			libraries=['systemd'],
-			#extra_compile_args=["-O3", "-std=c99"] # match systemd
+			extra_compile_args=["-std=c99", "-O3", "-Werror=implicit-function-declaration", "-D_SVID_SOURCE", "-D_DEFAULT_SOURCE", "-D_LIBSYSTEMD_VERSION=%s" % libsystemd_ver] # match systemd
 		)
 	],
 	scripts=['scripts/dcbus'],
