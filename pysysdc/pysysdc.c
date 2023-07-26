@@ -63,7 +63,9 @@ static PyObject* pysysdc_deinit_server(PyObject *self, PyObject *args)
 {
 	Py_BEGIN_ALLOW_THREADS
 		deinit_server();
+		#if PY_VERSION_HEX <= 0x30502F0
 		Py_Finalize();
+		#endif
 	Py_END_ALLOW_THREADS
 
 	Py_RETURN_TRUE;
