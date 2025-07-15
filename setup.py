@@ -24,6 +24,7 @@ setup(
 	name="pysysdc",
 	version=VERSION,
 	description="Python C library for SD-Bus communication",
+	long_description_content_type='text/markdown',
 	long_description=long_description,
 	include_package_data=True,
 	author_email="andrey@bagrintsev.me, 1timkill@gmail.com, avdieev@gmail.com",
