@@ -14,12 +14,18 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    needs: [tag_version]
     strategy:
       matrix:
         os: [ubuntu-22.04]
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set version from tag
+        run: |
+          echo "version is: ${{ needs.tag_version.outputs.sem_ver }}"
+          sed -i "s/%VERSION%/${{ needs.tag_version.outputs.sem_ver }}/" pysysdc/__version__.py stdeb.cfg
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.11.4
