@@ -17,7 +17,7 @@ function show_help()
 
 function parse_reply()
 {
-	echo $1 | grep -o '"[^"]\+"' | tr '"' ' ' | xargs
+	echo $1 | grep -o '"[^"]\+"' | tr '"' ' '| sed 's/,.*//' | xargs
 }
 
 domain=''
@@ -57,6 +57,12 @@ do
 	esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+
+# backward compatibility
+if [[ "${method}" == "Token" ]];
+then
+	first_arg="get"
+fi
 
 if [[ -z "${domain}" ]];
 then

@@ -11,6 +11,9 @@ sd_bus* acquire_client_bus(void);
 sd_bus* client_bus_open(void);
 sd_bus* server_bus_open(void);
 
+int is_server_bus_open(void);
+int is_client_bus_open(void);
+
 void client_bus_close(void);
 void server_bus_close(void);
 

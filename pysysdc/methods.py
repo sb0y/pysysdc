@@ -1,4 +1,5 @@
 from pysysdc.sdbus import SDClient
+import logging
 
 class SDMethods(object):
 	@staticmethod
@@ -40,12 +41,29 @@ class SDMethods(object):
 		return SDClient.daemon_reload()
 
 class Methods(SDMethods):
+	
 	@staticmethod
 	def get_token():
-		sd = SDClient(service_name="dc.cloud.auth", path="/dc/cloud/auth", if_name="dc.cloud.auth", method_name="Token", method_args="s", method_return="is", output_sig="is")
-		return sd.send()
+		array = [None, None, None]
+		token_array = [None, None]
+		
+		try:
+			sd = SDClient(service_name="dc.cloud.auth", path="/dc/cloud/auth", if_name="dc.cloud.auth", method_name="Token", method_args="s", method_return="is", output_sig="is")
+			array = sd.send()
+			if array[1]:
+				token_array[0], token_array[1] = array[1].split(',')
+		except Exception as e:
+				logging.error("Pysysdc:: Get token exception ocurred")
+				logging.exception(e)
+		return (array[0], token_array[0], array[2], token_array[1])
 
 	@staticmethod
 	def token_fetch():
 		sd = SDClient(service_name="dc.cloud.auth", path="/dc/cloud/auth", if_name="dc.cloud.auth", method_name="Token", method_args="s", method_return="is", output_sig="is")
 		return sd.send(first_arg="refetch")
+
+	@staticmethod
+	def token_false():
+		sd = SDClient(service_name="dc.cloud.auth", path="/dc/cloud/auth", if_name="dc.cloud.auth", method_name="Token", method_args="s", method_return="is", output_sig="is")
+		return sd.send(first_arg="tokenfalse")
+

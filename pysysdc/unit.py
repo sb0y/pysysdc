@@ -9,11 +9,13 @@ class Unit(object):
 	__unit_name = ""
 
 	def __init__(self, unit_name: str, unit_type: str="service") -> None:
-		self.__bus = SDClient(service_name="org.freedesktop.systemd1",
+		self.__bus = SDClient(
+			service_name="org.freedesktop.systemd1",
 			path="/org/freedesktop/systemd1",
 			if_name="org.freedesktop.systemd1.Manager",
 			method_name="StartUnit",
-			method_args="ss"
+			input_sig="ss",
+			output_sig=""
 		)
 		
 		self.__unit_name = "%s.%s" % (unit_name, unit_type)

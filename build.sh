@@ -9,6 +9,8 @@ PYT_VERSION=`echo $BUILD_BUILDNUMBER | sed 's/\-.*$//'`
 DEB_VERSION=`echo $BUILD_BUILDNUMBER | sed 's/^.*\-//'`
 
 echo "VERSION AZURE PIPELINE:  $BUILD_BUILDNUMBER"
+echo "$PYT_VERSION"
+
 
 # Set version in files
 sed -i "s/%VERSION%/${PYT_VERSION}/" pysysdc/__version__.py stdeb.cfg

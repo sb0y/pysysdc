@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import os
 from setuptools import setup, Extension
-from pathlib import Path
 import re
 import subprocess
 
@@ -54,7 +52,10 @@ setup(
 				"pysysdc/systemd_methods.c",
 				"pysysdc/dc_error_handling.c",
 				"pysysdc/helpers.c",
-				"pysysdc/connect.c"
+				"pysysdc/connect.c",
+				"pysysdc/variant.c",
+				"pysysdc/signals.c",
+				"pysysdc/sd_python_runner.c"
 			],
 			libraries=['systemd'],
 			extra_compile_args=["-std=c99", "-O3", "-Werror=implicit-function-declaration", "-D_SVID_SOURCE", "-D_DEFAULT_SOURCE", "-D_LIBSYSTEMD_VERSION=%s" % libsystemd_ver] # match systemd

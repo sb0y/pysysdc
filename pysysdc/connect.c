@@ -21,6 +21,22 @@ sd_bus* get_client_bus(void)
 	return g_client_bus;
 }
 
+int is_server_bus_open(void)
+{
+	if(g_server_bus)
+		return 1;
+
+	return 0;
+}
+
+int is_client_bus_open(void)
+{
+	if(g_client_bus)
+		return 1;
+
+	return 0;
+}
+
 sd_bus* acquire_server_bus(void)
 {
 	if(!g_server_bus)
@@ -58,7 +74,7 @@ sd_bus* bus_open()
 sd_bus* client_bus_open(void)
 {
 	g_client_bus = bus_open();
-	if (dc_has_error()) 
+	if (dc_has_error())
 	{
 		return NULL;
 	}
@@ -69,7 +85,7 @@ sd_bus* client_bus_open(void)
 sd_bus* server_bus_open(void)
 {
 	g_server_bus = bus_open();
-	if (dc_has_error()) 
+	if (dc_has_error())
 	{
 		return NULL;
 	}
@@ -79,12 +95,20 @@ sd_bus* server_bus_open(void)
 
 void client_bus_close(void)
 {
-	bus_close(&g_client_bus);
+	if(g_client_bus)
+	{
+		bus_close(&g_client_bus);
+		g_client_bus = NULL;
+	}
 }
 
 void server_bus_close(void)
 {
-	bus_close(&g_server_bus);
+	if(g_server_bus)
+	{
+		bus_close(&g_server_bus);
+		g_server_bus = NULL;
+	}
 }
 
 void bus_close(sd_bus **bus)
@@ -92,7 +116,7 @@ void bus_close(sd_bus **bus)
 	//pthread_mutex_lock(&mutex);
 		//pid_t x = syscall(__NR_gettid);
 		//fprintf(stderr, "unref %d\n", x);
-		if(*bus)
+		if(bus && *bus)
 		{
 			sd_bus_flush_close_unref(*bus);
 			*bus = NULL;

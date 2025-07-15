@@ -9,14 +9,19 @@ class SDReply(object):
 	py_int = None
 	py_bool = None
 	strerr = ''
-	def __init__(self, init_list: list) -> None:
-		if init_list[0] < 0:
-			err = pysysdc.get_last_error(init_list[0])
+	def __init__(self, init_tuple: tuple) -> None:
+		if init_tuple[0] < 0:
+			err = pysysdc.get_last_error(init_tuple[0])
 			logging.error("SDReply: '%s'", err)
-		self.sd_code = init_list[0]
-		self.py_code = init_list[1]
-		if len(init_list) > 2 and init_list[2] is not None:
-			self.py_string = init_list[2]
+		tuple_len = len(init_tuple)
+		if tuple_len > 1:
+			self.sd_code = init_tuple[0]
+			if isinstance(init_tuple[1], int):
+				self.py_code = init_tuple[1]
+			elif isinstance(init_tuple[1], str):
+				self.py_string = init_tuple[1]
+		if tuple_len > 2 and init_tuple[2] is not None:
+			self.py_string = init_tuple[2]
 
 	def __bool__(self) -> bool:
 		if self.sd_code >= 0 and self.py_code >= 0:
@@ -25,7 +30,7 @@ class SDReply(object):
 		return False
 
 	def __repr__(self) -> str:
-		return '{"sd_code": %s, "py_code": "%s", "py_string": "%s"}' % (str(self.sd_code), str(self.py_code), str(self.py_string))
+		return 'SDReply({"sd_code": %s, "py_code": "%s", "py_string": "%s"})' % (str(self.sd_code), str(self.py_code), str(self.py_string))
 
 	def __getitem__(self, index: int) -> Union[str, int, bool]:
 		# this order is for backwards compatibility
@@ -39,6 +44,8 @@ class SDReply(object):
 			return str(self.py_int)
 		elif self.py_bool is not None:
 			return "true" if self.py_bool else "false"
+		elif self.sd_code is not None:
+			return str(self.py_code)
 
 		return None
 

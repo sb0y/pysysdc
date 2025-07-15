@@ -4,8 +4,8 @@
 from pysysdc.unit import Unit
 
 # systemd service name
-u = Unit("token_manager")
-print(u.restart())
-print(u.stop())
+u = Unit("nginx")
+print(repr(u.stop()))
 print(u.start())
 print(u.reload())
+print(u.restart())

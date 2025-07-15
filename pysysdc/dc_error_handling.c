@@ -29,7 +29,10 @@ static inline const char *enum_to_str(enum dc_error_codes_t err)
 		[FAILED_TO_CALL_METHOD] = "Failed to call method",
 		[FAILED_TO_ADD_OBJECT_VTABLE] = "Failed to add object vtable",
 		[FAILED_TO_REPLY_METHOD_RETURN] = "Failed to reply method return",
-		[FAILED_TO_RUN_PYTHON_FUNCTION] = "Failed to run python function"
+		[FAILED_TO_RUN_PYTHON_FUNCTION] = "Failed to run python function",
+		[FAILED_TO_GET_SD_FD] = "Failed to get bus file descriptor",
+		[FAILED_EPOLL_CREATE] = "Failed to call epoll_create()",
+		[FAILED_EPOLL_CTL] = "Failed to call epoll_ctl()"
 	};
 
 	return strings[err];
