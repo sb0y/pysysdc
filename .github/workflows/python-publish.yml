@@ -37,7 +37,7 @@ jobs:
 
       - name: Build sdist
         run: |
-          echo "${{ needs.tag_version.outputs.sem_ver }}"
+          echo "version is: ${{ needs.tag_version.outputs.sem_ver }}"
           sed -i "s/%VERSION%/${{ needs.tag_version.outputs.sem_ver }}/" pysysdc/__version__.py stdeb.cfg
           pipx run build --sdist
 
@@ -63,9 +63,9 @@ jobs:
           WITH_V: true
           DEFAULT_BUMP: patch
           TAG_CONTEXT: branch
-          INITIAL_VERSION: 'v1.0.0'
+          INITIAL_VERSION: 'v2.0.0'
           VERBOSE: false
-      - name: test
+      - name: print_version
         run: echo "${{ steps.ver_tag.outputs.new_tag }}"
 
   upload_pypi:
