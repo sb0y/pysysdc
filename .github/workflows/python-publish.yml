@@ -84,13 +84,23 @@ jobs:
     # alternatively, to publish when a GitHub Release is created, use the following rule:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v4
-        with:
+      #- uses: actions/download-artifact@v4
+      #  with:
           # unpacks default artifact into dist/
           # if `name: artifact` is omitted, the action will create extra parent dir
-          name: artifact
-          path: dist
+      #    name: artifact
+      #    path: dist
+      
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: dist/
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist/
+      
       - uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
