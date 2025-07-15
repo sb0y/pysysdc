@@ -24,7 +24,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.11.4
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
 
@@ -41,7 +41,7 @@ jobs:
           sed -i "s/%VERSION%/${{ needs.tag_version.outputs.sem_ver }}/" pysysdc/__version__.py stdeb.cfg
           pipx run build --sdist
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
   
